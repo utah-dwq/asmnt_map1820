@@ -1,0 +1,80 @@
+---
+output:
+  html_document
+---
+
+```{r, echo = F, out.extra='style="border: none;"', fig.width=16}
+library(leaflet)
+
+load("au_asmnt_dat.Rdata")
+aup$AU_DWQCat1[aup$AU_NAME=="Willard Bay Reservoir"]="Fully Supporting"
+aup$lab[aup$AU_NAME=="Willard Bay Reservoir"]="<p>AU name: Willard Bay Reservoir<br />AU ID: UT-L-16020102-004_00<br />Assessment: Fully Supporting<br />Not Supporting Parameters: NA<br />Approved TMDL Parameters: NA<br />TMDL ID: NA"
+aup$AU_DWQCat1[aup$AU_NAME=="Monroe Creek"]="Fully Supporting"
+aup$lab[aup$AU_NAME=="Monroe Creek"]="<p>AU name: Monroe Creek<br />AU ID: UT16030003-013_00<br />Assessment: Fully Supporting<br />Not Supporting Parameters: NA<br />Approved TMDL Parameters: NA<br />TMDL ID: NA"
+
+
+factpal <- colorFactor(c("#4daf4a","#377eb8","#ff7f00","#e41a1c","#984ea3","#6a6666"), unique(aup$AU_DWQCat1))
+
+map=leaflet()%>%
+  addWMSTiles("https://basemap.nationalmap.gov/arcgis/services/USGSTopo/MapServer/WmsServer", group = "USGS topo", options = providerTileOptions(updateWhenZooming = FALSE,updateWhenIdle = TRUE), layers = "0") %>%
+  addWMSTiles("https://basemap.nationalmap.gov/arcgis/services/USGSHydroCached/MapServer/WmsServer", group = "Hydrography", options = providerTileOptions(updateWhenZooming = FALSE,updateWhenIdle = TRUE), layers = "0") %>%
+  addProviderTiles("Esri.WorldImagery", group = "Satellite", options = providerTileOptions(updateWhenZooming = FALSE,updateWhenIdle = TRUE)) %>%
+  addProviderTiles("Esri.WorldTopoMap", group = "World topo", options = providerTileOptions(updateWhenZooming = FALSE,updateWhenIdle = TRUE)) %>%
+  addMapPane("underlay_polygons", zIndex = 410) %>%
+  addMapPane("au_poly", zIndex = 415)  %>%
+  addMapPane("markers", zIndex = 420)  %>%
+  addPolygons(data=wqTools::bu_poly,group="Beneficial uses",fillOpacity = 0.1,weight=3,color="green", options = pathOptions(pane = "underlay_polygons"),
+              popup=paste0(
+                "Description: ", wqTools::bu_poly$R317Descrp,
+                "<br> Uses: ", wqTools::bu_poly$bu_class)
+  ) %>% 
+  addPolygons(data=aup[aup$AU_Cat=="1",],group="Fully Supporting AUs",fillOpacity = 0.2,weight=2,color=~factpal(AU_DWQCat1), options = pathOptions(pane = "au_poly"),
+              popup=~lab
+  ) %>% 
+  addPolygons(data=aup[aup$AU_Cat=="2",],group="No Evidence of Impairment AUs",fillOpacity = 0.2,weight=2,color=~factpal(AU_DWQCat1), options = pathOptions(pane = "au_poly"),
+              popup=~lab
+  ) %>% 
+  addPolygons(data=aup[aup$AU_Cat=="3",],group="Insufficient Data AUs",fillOpacity = 0.2,weight=2,color=~factpal(AU_DWQCat1), options = pathOptions(pane = "au_poly"),
+              popup=~lab
+  ) %>% 
+  addPolygons(data=aup[aup$AU_Cat=="4A",],group="Approved TMDL AUs",fillOpacity = 0.2,weight=2,color=~factpal(AU_DWQCat1), options = pathOptions(pane = "au_poly"),
+              popup=~lab
+  ) %>% 
+  addPolygons(data=aup[aup$AU_Cat=="5",],group="Not Supporting AUs",fillOpacity = 0.2,weight=2,color=~factpal(AU_DWQCat1), options = pathOptions(pane = "au_poly"),
+              popup=~lab
+  ) %>% 
+  addPolygons(data=aup[aup$AU_Cat=="Not Assessed",],group="Not Assessed AUs",fillOpacity = 0.2,weight=2,color=~factpal(AU_DWQCat1), options = pathOptions(pane = "au_poly"),
+              popup=~lab
+  ) %>% 
+  addPolygons(data=wqTools::ss_poly,group="Site-specific standards",fillOpacity = 0.1,weight=3,color="blue", options = pathOptions(pane = "underlay_polygons"),
+              popup=paste0("SS std: ", wqTools::ss_poly$SiteSpecif)
+  ) %>%
+  addPolygons(data=wqTools::wmu_poly,group="Watershed management units",fillOpacity = 0.1,weight=3,color="red", options = pathOptions(pane = "underlay_polygons"),
+              popup=wqTools::wmu_poly$Mgmt_Unit
+  ) %>%
+  addPolygons(data=wqTools::ut_poly,group="UT boundary",smoothFactor=3,fillOpacity = 0.2,weight=2,color="purple", options = pathOptions(pane = "underlay_polygons")) %>%
+  addCircles(data = aup, lng=~Long, lat=~Lat, group = "AUID",stroke=F, fill=F, label=~ASSESS_ID,
+             popup = aup$ASSESS_ID) %>%
+  addCircles(data = aup, lng =~Long, lat =~Lat, group = "AUName",stroke=F, fill=F, label=~AU_NAME,
+             popup = aup$AU_NAME)%>%
+  hideGroup("Site-specific standards") %>%
+  hideGroup("Beneficial uses") %>%
+  hideGroup("UT boundary") %>%
+  hideGroup("Watershed management units")%>%
+  addLayersControl(position ="topleft",baseGroups = c("World topo","USGS topo", "Hydrography", "Satellite"),overlayGroups = c("Fully Supporting AUs","No Evidence of Impairment AUs","Insufficient Data AUs","Approved TMDL AUs","Not Supporting AUs","Not Assessed AUs","Beneficial uses", "Site-specific standards", "Watershed management units", "UT boundary"),
+                                options = leaflet::layersControlOptions(collapsed = TRUE, autoZIndex=FALSE))%>%
+  addLegend("topright", pal = factpal, values = unique(aup$AU_DWQCat1),title = "Assessment Category",opacity = 0.8)%>%wqTools::addMapResetButton()%>%
+  leaflet.extras::removeSearchFeatures() %>% 
+  leaflet.extras::addSearchFeatures(
+    targetGroups = c('AUID','AUName'),
+    options = leaflet.extras::searchFeaturesOptions(
+      zoom=12, openPopup = FALSE, firstTipSubmit = TRUE,
+      autoCollapse = TRUE, hideMarkerOnCollapse = TRUE ))
+map
+
+```
+
+
+
+
+
