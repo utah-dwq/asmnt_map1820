@@ -1,8 +1,6 @@
 ---
 output: 
-  flexdashboard::flex_dashboard:
-    orientation: columns
-    theme: yeti
+  html_document
 ---
 
 ```{r, echo = F, out.width="100%"}
@@ -17,16 +15,6 @@ aup$lab[aup$AU_NAME=="Monroe Creek"]="<p>AU name: Monroe Creek<br />AU ID: UT160
 
 factpal <- colorFactor(c("#4daf4a","#377eb8","#ff7f00","#e41a1c","#984ea3","#6a6666"), unique(aup$AU_DWQCat1))
 ```
-
-
-<style>
-body {
-  padding-top:0px
-}
-.navbar{
-  visibility: hidden
-}
-</style>
 
 
 <style type="text/css">
