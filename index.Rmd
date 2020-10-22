@@ -4,17 +4,6 @@ output:
     orientation: columns
 ---
 
-```{r, echo = F, out.width="100%"}
-library(leaflet)
-
-load("au_asmnt_dat.Rdata")
-aup$AU_DWQCat1[aup$AU_NAME=="Willard Bay Reservoir"]="Fully Supporting"
-aup$lab[aup$AU_NAME=="Willard Bay Reservoir"]="<p>AU name: Willard Bay Reservoir<br />AU ID: UT-L-16020102-004_00<br />Assessment: Fully Supporting<br />Not Supporting Parameters: NA<br />Approved TMDL Parameters: NA<br />TMDL ID: NA"
-aup$AU_DWQCat1[aup$AU_NAME=="Monroe Creek"]="Fully Supporting"
-aup$lab[aup$AU_NAME=="Monroe Creek"]="<p>AU name: Monroe Creek<br />AU ID: UT16030003-013_00<br />Assessment: Fully Supporting<br />Not Supporting Parameters: NA<br />Approved TMDL Parameters: NA<br />TMDL ID: NA"
-factpal <- colorFactor(c("#4daf4a","#377eb8","#ff7f00","#e41a1c","#984ea3","#6a6666"), unique(aup$AU_DWQCat1))
-```
-
 
 <style>
 body {
@@ -39,7 +28,7 @@ body {
 
 
 ```{r, echo = F, out.width="100%"}
-#setwd("C:\\Users\\jvander\\Documents\\R\\ir-prog-team\\figures")
+#setwd("C:\\Users\\jvander\\Documents\\R\\asmnt_map1820")
 library(leaflet)
 
 load("au_asmnt_dat.Rdata")
@@ -47,9 +36,6 @@ aup$AU_DWQCat1[aup$AU_NAME=="Willard Bay Reservoir"]="Fully Supporting"
 aup$lab[aup$AU_NAME=="Willard Bay Reservoir"]="<p>AU name: Willard Bay Reservoir<br />AU ID: UT-L-16020102-004_00<br />Assessment: Fully Supporting<br />Not Supporting Parameters: NA<br />Approved TMDL Parameters: NA<br />TMDL ID: NA"
 aup$AU_DWQCat1[aup$AU_NAME=="Monroe Creek"]="Fully Supporting"
 aup$lab[aup$AU_NAME=="Monroe Creek"]="<p>AU name: Monroe Creek<br />AU ID: UT16030003-013_00<br />Assessment: Fully Supporting<br />Not Supporting Parameters: NA<br />Approved TMDL Parameters: NA<br />TMDL ID: NA"
-
-
-factpal <- colorFactor(c("#4daf4a","#377eb8","#ff7f00","#e41a1c","#984ea3","#6a6666"), unique(aup$AU_DWQCat1))
 
 map=leaflet()%>%
   #addWMSTiles("https://basemap.nationalmap.gov/arcgis/services/USGSTopo/MapServer/WmsServer", group = "USGS topo", options = providerTileOptions(updateWhenZooming = FALSE,updateWhenIdle = TRUE), layers = "0") %>%
@@ -64,24 +50,24 @@ map=leaflet()%>%
   #              "Description: ", wqTools::bu_poly$R317Descrp,
   #              "<br> Uses: ", wqTools::bu_poly$bu_class)
   #) %>% 
-  addPolygons(data=aup[aup$AU_Cat=="1",],group="Fully Supporting AUs",fillOpacity = 0.2,weight=2,color=~factpal(AU_DWQCat1), options = pathOptions(pane = "au_poly"),
+  addPolygons(data=aup[aup$AU_Cat=="3",],group="Insufficient Data AUs",fillOpacity = 0.3,weight=2,color="#a6a6a6", options = pathOptions(pane = "au_poly"),
               popup=~lab
   ) %>% 
-  addPolygons(data=aup[aup$AU_Cat=="2",],group="No Evidence of Impairment AUs",fillOpacity = 0.2,weight=2,color=~factpal(AU_DWQCat1), options = pathOptions(pane = "au_poly"),
+  addPolygons(data=aup[aup$AU_Cat=="5",],group="Not Supporting AUs",fillOpacity = 0.3,weight=2,color="#e41a1c", options = pathOptions(pane = "au_poly"),
               popup=~lab
   ) %>% 
-  addPolygons(data=aup[aup$AU_Cat=="3",],group="Insufficient Data AUs",fillOpacity = 0.2,weight=2,color=~factpal(AU_DWQCat1), options = pathOptions(pane = "au_poly"),
+  addPolygons(data=aup[aup$AU_Cat=="4A",],group="Approved TMDL AUs",fillOpacity = 0.3,weight=2,color="#984ea3", options = pathOptions(pane = "au_poly"),
               popup=~lab
   ) %>% 
-  addPolygons(data=aup[aup$AU_Cat=="4A",],group="Approved TMDL AUs",fillOpacity = 0.2,weight=2,color=~factpal(AU_DWQCat1), options = pathOptions(pane = "au_poly"),
+  addPolygons(data=aup[aup$AU_Cat=="2",],group="No Evidence of Impairment AUs",fillOpacity = 0.3,weight=2,color="#255d8a", options = pathOptions(pane = "au_poly"),
               popup=~lab
   ) %>% 
-  addPolygons(data=aup[aup$AU_Cat=="5",],group="Not Supporting AUs",fillOpacity = 0.2,weight=2,color=~factpal(AU_DWQCat1), options = pathOptions(pane = "au_poly"),
+  addPolygons(data=aup[aup$AU_Cat=="1",],group="Fully Supporting AUs",fillOpacity = 0.3,weight=2,color="#118a11", options = pathOptions(pane = "au_poly"),
               popup=~lab
   ) %>% 
-  addPolygons(data=aup[aup$AU_Cat=="Not Assessed",],group="Not Assessed AUs",fillOpacity = 0.2,weight=2,color=~factpal(AU_DWQCat1), options = pathOptions(pane = "au_poly"),
-              popup=~lab
-  ) %>% 
+  #addPolygons(data=aup[aup$AU_Cat=="Not Assessed",],group="Not Assessed AUs",fillOpacity = 0,weight=2,color="black", options = pathOptions(pane = "au_poly"),
+  #            popup=~lab
+  #) %>% 
   #addPolygons(data=wqTools::ss_poly,group="Site-specific standards",fillOpacity = 0.1,weight=3,color="blue", options = pathOptions(pane = "underlay_polygons"),
   #            popup=paste0("SS std: ", wqTools::ss_poly$SiteSpecif)
   #) %>%
@@ -101,7 +87,12 @@ map=leaflet()%>%
   #                              options = leaflet::layersControlOptions(collapsed = TRUE, autoZIndex=FALSE))%>%
   addLayersControl(position ="topleft",overlayGroups = c("Fully Supporting AUs","No Evidence of Impairment AUs","Insufficient Data AUs","Approved TMDL AUs","Not Supporting AUs","Not Assessed AUs"),
                                 options = leaflet::layersControlOptions(collapsed = TRUE, autoZIndex=FALSE))%>%
-  addLegend("topright", pal = factpal, values = unique(aup$AU_DWQCat1),title = "Assessment Category",opacity = 0.8)%>%wqTools::addMapResetButton()%>%
+  addLegend("topright", 
+	colors=c("#118a11", "#255d8a", "#a6a6a6", "#984ea3", "#e41a1c"), 
+	labels = c("Fully supporting", "No evidence of impairment", "Insufficient data", "Approved TMDL", "Not supporting"),
+	title = "Assessment Category",opacity = 0.6
+  )%>%
+  wqTools::addMapResetButton()%>%
   leaflet.extras::removeSearchFeatures() %>% 
   leaflet.extras::addSearchFeatures(
     targetGroups = c('AUID','AUName'),
