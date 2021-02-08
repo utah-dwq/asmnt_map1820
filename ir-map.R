@@ -1,4 +1,4 @@
-asmnts = readxl::read_xlsx("C:\\Users\\ehinman\\Desktop\\ATTAINS_export_01192021\\Draft_IR_tables.xlsx", sheet = "SECOND DRAFT")
+asmnts = readxl::read_xlsx("C:\\Users\\ehinman\\Documents\\GitHub\\asmnt_map1820\\Draft_IR_tables.xlsx", sheet = "SECOND DRAFT")
 asmnts1 = unique(asmnts[,names(asmnts)%in%c("Assessment Unit ID","Assessment Unit Category")])
 
 dups= names(table(asmnts1$`Assessment Unit ID`)[table(asmnts1$`Assessment Unit ID`)>1])
@@ -72,7 +72,7 @@ aup = cbind(aup, coords)
 names(aup)[names(aup)=="X"] = "Long"
 names(aup)[names(aup)=="Y"] = "Lat"
 
-save(aup, file = "C:\\Users\\ehinman\\Documents\\GitHub\\ir-prog-team\\figures\\au_asmnt_dat.RData")
+save(aup, file = "C:\\Users\\ehinman\\Documents\\GitHub\\asmnt_map1820\\au_asmnt_dat.RData")
 save(aup, file = "C:\\Users\\ehinman\\Desktop\\ATTAINS_export_01192021\\au_asmnt_dat.RData")
 
 factpal <- colorFactor(c("#4daf4a","#377eb8","#ff7f00","#e41a1c","#984ea3","#6a6666"), unique(aup$AU_DWQCat1))
