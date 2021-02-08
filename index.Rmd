@@ -29,6 +29,7 @@ body {
 
 ```{r, echo = F, out.width="100%"}
 #setwd("C:\\Users\\jvander\\Documents\\R\\asmnt_map1820")
+setwd("C:\\Users\\ehinman\\Documents\\GitHub\\asmnt_map1820")
 library(leaflet)
 
 load("au_asmnt_dat.Rdata")
@@ -102,8 +103,8 @@ map=leaflet()%>%
 #map=leaflet() %>% addPolygons(data=wqTools::ut_poly,group="UT boundary",smoothFactor=3,fillOpacity = 0.2,weight=2,color="purple")
 map
 
-#htmlwidgets::saveWidget(file="asmnt_map_selfcontained.html", map)
-#rsconnect::deployDoc("asmnt_map_selfcontained.html", server="bookdown.org", appName="IR 2018/2020 assessment map")
+# htmlwidgets::saveWidget(file="asmnt_map_selfcontained.html", map)
+# rsconnect::deployDoc("asmnt_map_selfcontained.html", server="bookdown.org", appName="IR 2018/2020 assessment map")
 
 ```
 
